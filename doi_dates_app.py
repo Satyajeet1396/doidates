@@ -103,7 +103,7 @@ class DOIProcessor:
             
             if doi_column is None:
                 st.error("Error: Could not find DOI column")
-                return None
+                return None, None
                 
             # Get DOIs from the identified column
             dois = df[doi_column].astype(str).tolist()
@@ -112,7 +112,7 @@ class DOIProcessor:
             
             if not dois:
                 st.error("No DOIs found in the files")
-                return None
+                return None, None
                 
             # Process DOIs in parallel
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -168,6 +168,14 @@ def main():
     st.title("DOI Date Retriever")
     st.write("Upload CSV files containing DOIs to retrieve their creation dates")
     
+    # Initialize session state
+    if 'processed_data' not in st.session_state:
+        st.session_state.processed_data = None
+    if 'filtered_data' not in st.session_state:
+        st.session_state.filtered_data = None
+    if 'dates_dict' not in st.session_state:
+        st.session_state.dates_dict = None
+    
     # File uploader
     uploaded_files = st.file_uploader("Choose CSV files", type="csv", accept_multiple_files=True)
     
@@ -179,70 +187,81 @@ def main():
         end_date = st.date_input("End Date (optional)", value=None)
     
     if uploaded_files:
-        if st.button("Process DOIs"):
-            processor = DOIProcessor()
-            
-            # Combine files
-            df = processor.combine_csv_files(uploaded_files)
-            
-            if df is not None:
-                # Create progress bar
-                progress_bar = st.progress(0)
-                st.write("Processing DOIs...")
+        if st.button("Process DOIs") or st.session_state.processed_data is not None:
+            if st.session_state.processed_data is None:  # Only process if not already done
+                processor = DOIProcessor()
                 
-                # Process DOIs
-                df, dates_dict = processor.process_dois(df, progress_bar)
+                # Combine files
+                df = processor.combine_csv_files(uploaded_files)
                 
                 if df is not None:
-                    # Filter by date range if specified
-                    if start_date or end_date:
-                        filtered_df = processor.filter_by_date_range(
-                            df.copy(), start_date, end_date)
+                    # Create progress bar
+                    progress_bar = st.progress(0)
+                    st.write("Processing DOIs...")
+                    
+                    # Process DOIs
+                    processed_df, dates_dict = processor.process_dois(df, progress_bar)
+                    
+                    if processed_df is not None:
+                        st.session_state.processed_data = processed_df
+                        st.session_state.dates_dict = dates_dict
+            
+            # Use processed data from session state
+            if st.session_state.processed_data is not None:
+                df = st.session_state.processed_data
+                dates_dict = st.session_state.dates_dict
+                
+                # Filter by date range if specified
+                if start_date or end_date:
+                    processor = DOIProcessor()
+                    filtered_df = processor.filter_by_date_range(
+                        df.copy(), start_date, end_date)
+                    
+                    if len(filtered_df) > 0:
+                        st.session_state.filtered_data = filtered_df
+                        st.write(f"Found {len(filtered_df)} records in date range")
+                        st.write("Filtered Results:")
+                        st.dataframe(filtered_df)
                         
-                        if len(filtered_df) > 0:
-                            st.write(f"Found {len(filtered_df)} records in date range")
-                            st.write("Filtered Results:")
-                            st.dataframe(filtered_df)
-                            
-                            # Download button for filtered results
-                            csv_filtered = filtered_df.to_csv(index=False)
-                            st.download_button(
-                                label="Download Filtered Results",
-                                data=csv_filtered,
-                                file_name=f"doi_dates_filtered_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                                mime="text/csv"
-                            )
-                        else:
-                            st.warning("No records found in the specified date range")
-                    
-                    # Show full results
-                    st.write("Full Results:")
-                    st.dataframe(df)
-                    
-                    # Download button for full results
-                    csv_full = df.to_csv(index=False)
-                    st.download_button(
-                        label="Download Full Results",
-                        data=csv_full,
-                        file_name=f"doi_dates_full_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                        mime="text/csv"
-                    )
-                    
-                    # Show summary
-                    st.write("Summary:")
-                    total_found = sum(1 for date in dates_dict.values() 
-                                    if date not in ["Not available", "Error"])
-                    st.write(f"Total DOIs processed: {len(dates_dict)}")
-                    st.write(f"DOIs with dates found: {total_found}")
-                    st.write(f"DOIs without dates: {len(dates_dict) - total_found}")
-                    
-                    # Show errors if any
-                    if processor.errors:
-                        st.write("Errors encountered:")
-                        for error in processor.errors[:5]:
-                            st.write(f"- {error}")
-                        if len(processor.errors) > 5:
-                            st.write(f"...and {len(processor.errors) - 5} more errors")
+                        # Download button for filtered results
+                        csv_filtered = filtered_df.to_csv(index=False)
+                        st.download_button(
+                            label="Download Filtered Results",
+                            data=csv_filtered,
+                            file_name=f"doi_dates_filtered_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                            mime="text/csv"
+                        )
+                    else:
+                        st.warning("No records found in the specified date range")
+                
+                # Show full results
+                st.write("Full Results:")
+                st.dataframe(df)
+                
+                # Download button for full results
+                csv_full = df.to_csv(index=False)
+                st.download_button(
+                    label="Download Full Results",
+                    data=csv_full,
+                    file_name=f"doi_dates_full_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                    mime="text/csv"
+                )
+                
+                # Show summary
+                st.write("Summary:")
+                total_found = sum(1 for date in dates_dict.values() 
+                                if date not in ["Not available", "Error"])
+                st.write(f"Total DOIs processed: {len(dates_dict)}")
+                st.write(f"DOIs with dates found: {total_found}")
+                st.write(f"DOIs without dates: {len(dates_dict) - total_found}")
+    
+    # Clear results button
+    if st.session_state.processed_data is not None:
+        if st.button("Clear Results"):
+            st.session_state.processed_data = None
+            st.session_state.filtered_data = None
+            st.session_state.dates_dict = None
+            st.experimental_rerun()
 
 if __name__ == "__main__":
     main()
