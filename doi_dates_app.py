@@ -107,6 +107,7 @@ class DOIProcessor:
                 
             # Get DOIs from the identified column
             dois = df[doi_column].astype(str).tolist()
+            dois = [doi for doi in dois if pd.notna(doi) and doi != 'nan']
             st.write(f"Found {len(dois)} unique DOIs to process")
             
             if not dois:
@@ -117,16 +118,20 @@ class DOIProcessor:
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 futures = []
                 for doi in dois:
-                    if pd.notna(doi) and doi != 'nan':
-                        future = executor.submit(self.get_paper_date, doi)
-                        futures.append(future)
+                    future = executor.submit(self.get_paper_date, doi)
+                    futures.append(future)
+                
+                # Initialize counter for progress
+                completed = 0
+                total = len(futures)
                 
                 # Update progress bar
                 for future in as_completed(futures):
                     result = future.result()
                     if result[1] != "Not available":
                         self.results.append(result)
-                    progress_bar.progress((len(self.results) + 1) / len(futures))
+                    completed += 1
+                    progress_bar.progress(min(1.0, completed / total))
             
             # Convert results to dictionary
             dates_dict = {str(k): v for k, v in dict(self.results).items()}
@@ -149,6 +154,9 @@ class DOIProcessor:
             
             # Convert back to string format
             df['Created Date'] = df['Created Date'].dt.strftime('%Y-%m')
+            
+            # Set progress to complete
+            progress_bar.progress(1.0)
             
             return df, dates_dict
             
