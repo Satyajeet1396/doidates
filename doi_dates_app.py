@@ -176,27 +176,30 @@ def main():
     if 'dates_dict' not in st.session_state:
         st.session_state.dates_dict = None
     
-    # Clear results button at the top
-    if st.session_state.processed_data is not None:
-        if st.button("Clear Results"):
-            for key in ['processed_data', 'filtered_data', 'dates_dict']:
-                if key in st.session_state:
-                    del st.session_state[key]
-            st.rerun()
-    
     # File uploader
     uploaded_files = st.file_uploader("Choose CSV files", type="csv", accept_multiple_files=True)
     
-    # Date range inputs
-    col1, col2 = st.columns(2)
+    # Clear results button - moved after file uploader
+    col1, col2 = st.columns([1, 4])
     with col1:
+        if st.session_state.processed_data is not None:
+            if st.button("Clear Results"):
+                for key in ['processed_data', 'filtered_data', 'dates_dict']:
+                    if key in st.session_state:
+                        del st.session_state[key]
+                st.rerun()
+    
+    # Date range inputs
+    date_col1, date_col2 = st.columns(2)
+    with date_col1:
         start_date = st.date_input("Start Date (optional)", value=None)
-    with col2:
+    with date_col2:
         end_date = st.date_input("End Date (optional)", value=None)
     
     if uploaded_files:
-        if st.button("Process DOIs") or st.session_state.processed_data is not None:
-            if st.session_state.processed_data is None:  # Only process if not already done
+        process_button = st.button("Process DOIs")
+        if process_button or st.session_state.processed_data is not None:
+            if st.session_state.processed_data is None or process_button:  # Process if no data or button clicked
                 processor = DOIProcessor()
                 
                 # Combine files
