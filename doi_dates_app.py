@@ -183,7 +183,7 @@ def main():
     col1, col2 = st.columns([1, 4])
     with col1:
         if st.session_state.processed_data is not None:
-            if st.button("Clear Results"):
+            if st.button("Clear Results", type="secondary", use_container_width=True):
                 for key in ['processed_data', 'filtered_data', 'dates_dict']:
                     if key in st.session_state:
                         del st.session_state[key]
@@ -197,7 +197,7 @@ def main():
         end_date = st.date_input("End Date (optional)", value=None)
     
     if uploaded_files:
-        process_button = st.button("Process DOIs")
+        process_button = st.button("Process DOIs", type="primary", use_container_width=True)
         if process_button or st.session_state.processed_data is not None:
             if st.session_state.processed_data is None or process_button:  # Process if no data or button clicked
                 processor = DOIProcessor()
