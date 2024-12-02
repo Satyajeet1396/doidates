@@ -176,6 +176,14 @@ def main():
     if 'dates_dict' not in st.session_state:
         st.session_state.dates_dict = None
     
+    # Clear results button at the top
+    if st.session_state.processed_data is not None:
+        if st.button("Clear Results"):
+            for key in ['processed_data', 'filtered_data', 'dates_dict']:
+                if key in st.session_state:
+                    del st.session_state[key]
+            st.rerun()
+    
     # File uploader
     uploaded_files = st.file_uploader("Choose CSV files", type="csv", accept_multiple_files=True)
     
@@ -254,14 +262,6 @@ def main():
                 st.write(f"Total DOIs processed: {len(dates_dict)}")
                 st.write(f"DOIs with dates found: {total_found}")
                 st.write(f"DOIs without dates: {len(dates_dict) - total_found}")
-    
-    # Clear results button
-    if st.session_state.processed_data is not None:
-        if st.button("Clear Results"):
-            st.session_state.processed_data = None
-            st.session_state.filtered_data = None
-            st.session_state.dates_dict = None
-            st.experimental_rerun()
 
 if __name__ == "__main__":
     main()
