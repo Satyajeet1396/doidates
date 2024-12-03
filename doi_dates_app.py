@@ -300,55 +300,61 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # Add credits and support section after main app
+    # Add credits section after main app
     st.divider()
     st.info("Created by Dr. Satyajeet Patil")
     st.info("For more cool apps like this visit: https://patilsatyajeet.wixsite.com/home/python")
     
-    # Support section
-    st.title("Support our Research")
-    
-    # Generate UPI QR code
-    import qrcode
-    from io import BytesIO
-    import base64
-    upi_url = "upi://pay?pa=satyajeet1396@oksbi&pn=Satyajeet Patil&cu=INR"
-    qr = qrcode.make(upi_url)
-    
-    # Save QR code to BytesIO
-    buffer = BytesIO()
-    qr.save(buffer, format="PNG")
-    buffer.seek(0)
-    qr_base64 = base64.b64encode(buffer.getvalue()).decode()
-    
-    # Display QR code with message
-    st.write("Scan the QR code below to make a payment to: satyajeet1396@oksbi")
-    st.markdown(
-        f"""
-        <div style="display: flex; justify-content: center; align-items: center;">
-            <img src="data:image/png;base64,{qr_base64}" width="200">
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    
-    # Buy Me a Coffee button
-    st.markdown(
-        """
-        <div style="text-align: center; margin-top: 20px;">
-            <a href="https://www.buymeacoffee.com/researcher13" target="_blank">
-                <img src="https://img.buymeacoffee.com/button-api/?text=Support our Research&emoji=&slug=researcher13&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" alt="Support our Research"/>
-            </a>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    
-    # Donation message
-    st.markdown("""
-        <div style='text-align: center; padding: 1rem; background-color: #f0f2f6; border-radius: 10px; margin: 1rem 0;'>
-            <h3>🙏 Support Our Work</h3>
-            <p>Your support helps us continue developing free tools for the research community.</p>
-            <p>Every contribution, no matter how small, makes a difference!</p>
-        </div>
-        """, unsafe_allow_html=True)
+    # Support section in expander
+    with st.expander("🤝 Support Our Research", expanded=False):
+        st.markdown("""
+            <div style='text-align: center; padding: 1rem; background-color: #f0f2f6; border-radius: 10px; margin: 1rem 0;'>
+                <h3>🙏 Your Support Makes a Difference!</h3>
+                <p>Your contribution helps us continue developing free tools for the research community.</p>
+                <p>Every donation, no matter how small, fuels our research journey!</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Two columns for QR code and Buy Me a Coffee button
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("#### UPI Payment")
+            # Generate UPI QR code
+            import qrcode
+            from io import BytesIO
+            import base64
+            upi_url = "upi://pay?pa=satyajeet1396@oksbi&pn=Satyajeet Patil&cu=INR"
+            qr = qrcode.make(upi_url)
+            
+            # Save QR code to BytesIO
+            buffer = BytesIO()
+            qr.save(buffer, format="PNG")
+            buffer.seek(0)
+            qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+            
+            # Display QR code with message
+            st.markdown("Scan to pay: **satyajeet1396@oksbi**")
+            st.markdown(
+                f"""
+                <div style="display: flex; justify-content: center; align-items: center;">
+                    <img src="data:image/png;base64,{qr_base64}" width="200">
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        
+        with col2:
+            st.markdown("#### Buy Me a Coffee")
+            st.markdown("Support through Buy Me a Coffee platform:")
+            # Buy Me a Coffee button
+            st.markdown(
+                """
+                <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                    <a href="https://www.buymeacoffee.com/researcher13" target="_blank">
+                        <img src="https://img.buymeacoffee.com/button-api/?text=Support our Research&emoji=&slug=researcher13&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" alt="Support our Research"/>
+                    </a>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
