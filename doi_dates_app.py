@@ -173,7 +173,7 @@ def main():
     <h1 style='text-align: center;'>DOI Date Retriever</h1>
     """, unsafe_allow_html=True)
 
-    with st.expander("ℹ️ About This App", expanded=True):
+    with st.expander("ℹ️ About This App", expanded=False):
         st.markdown("""
         ### 📚 What is this app?
         This app helps researchers retrieve creation dates for academic papers using their DOIs (Digital Object Identifiers).
