@@ -308,6 +308,9 @@ st.info("For more cool apps like this visit: https://patilsatyajeet.wixsite.com/
 
 # Support section
 st.title("Support our Research")
+
+    with st.expander("ℹ️ Support our Research", expanded=False):
+        st.markdown("""
 st.write("Scan the QR code below to make a payment to: satyajeet1396@oksbi")
 
 # Generate UPI QR code
@@ -352,3 +355,16 @@ st.markdown("""
         <p>Every contribution, no matter how small, makes a difference!</p>
     </div>
     """, unsafe_allow_html=True)
+        """)
+
+
+
+
+
+
+
+
+
+
+
+
