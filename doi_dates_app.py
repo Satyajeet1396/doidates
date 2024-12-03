@@ -10,6 +10,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import warnings
 import glob
 import qrcode
+from io import BytesIO
 import base64
 warnings.filterwarnings('ignore')
 
