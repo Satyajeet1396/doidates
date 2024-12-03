@@ -165,35 +165,36 @@ class DOIProcessor:
             return None, None
 
 def main():
-    st.title("DOI Date Retriever")
-    
-    # App information
+    # Title and About section with custom styling
     st.markdown("""
-    ### 📚 About This App
-    This app helps researchers retrieve creation dates for academic papers using their DOIs (Digital Object Identifiers).
-    
-    #### Features:
-    * 📂 Upload multiple CSV files containing DOI columns
-    * 🔄 Process DOIs in parallel for faster results
-    * 📅 Filter results by date range
-    * 📊 View both full and filtered results
-    * 💾 Download results in CSV format
-    
-    #### How to Use:
-    1. Upload one or more CSV files containing DOI columns
-    2. (Optional) Set a date range to filter results
-    3. Click 'Process DOIs' to start retrieval
-    4. View results and download as needed
-    
-    #### Note:
-    * The app uses the Crossref API to retrieve publication dates
-    * Processing time depends on the number of DOIs
-    * Results show creation dates in YYYY-MM format
-    """)
+    <h1 style='text-align: center;'>DOI Date Retriever</h1>
+    """, unsafe_allow_html=True)
+
+    with st.expander("ℹ️ About This App", expanded=True):
+        st.markdown("""
+        ### 📚 What is this app?
+        This app helps researchers retrieve creation dates for academic papers using their DOIs (Digital Object Identifiers).
+        
+        ### ✨ Features:
+        * 📂 Upload multiple CSV files containing DOI columns
+        * 🔄 Process DOIs in parallel for faster results
+        * 📅 Filter results by date range
+        * 📊 View both full and filtered results
+        * 💾 Download results in CSV format
+        
+        ### 📝 How to Use:
+        1. Upload one or more CSV files containing DOI columns
+        2. (Optional) Set a date range to filter results
+        3. Click 'Process DOIs' to start retrieval
+        4. View results and download as needed
+        
+        ### ⚠️ Important Notes:
+        * The app uses the Crossref API to retrieve publication dates
+        * Processing time depends on the number of DOIs
+        * Results show creation dates in YYYY-MM format
+        """)
     
     st.divider()  # Add a visual separator
-    
-    st.write("Upload CSV files containing DOIs to retrieve their creation dates")
     
     # Initialize session state
     if 'processed_data' not in st.session_state:
@@ -203,28 +204,32 @@ def main():
     if 'dates_dict' not in st.session_state:
         st.session_state.dates_dict = None
     
-    # File uploader
+    # File uploader with description
+    st.markdown("### 📤 Upload Your Files")
+    st.write("Upload one or more CSV files containing DOI columns")
     uploaded_files = st.file_uploader("Choose CSV files", type="csv", accept_multiple_files=True)
     
     # Clear results button - moved after file uploader
     col1, col2 = st.columns([1, 4])
     with col1:
         if st.session_state.processed_data is not None:
-            if st.button("Clear Results", type="secondary", use_container_width=True):
+            if st.button("🗑️ Clear Results", type="secondary", use_container_width=True):
                 for key in ['processed_data', 'filtered_data', 'dates_dict']:
                     if key in st.session_state:
                         del st.session_state[key]
                 st.rerun()
     
-    # Date range inputs
+    # Date range inputs with better organization
+    st.markdown("### 📅 Date Range Filter (Optional)")
     date_col1, date_col2 = st.columns(2)
     with date_col1:
-        start_date = st.date_input("Start Date (optional)", value=None)
+        start_date = st.date_input("Start Date", value=None)
     with date_col2:
-        end_date = st.date_input("End Date (optional)", value=None)
+        end_date = st.date_input("End Date", value=None)
     
     if uploaded_files:
-        process_button = st.button("Process DOIs", type="primary", use_container_width=True)
+        st.markdown("### 🔄 Process DOIs")
+        process_button = st.button("🚀 Process DOIs", type="primary", use_container_width=True)
         if process_button or st.session_state.processed_data is not None:
             if st.session_state.processed_data is None or process_button:  # Process if no data or button clicked
                 processor = DOIProcessor()
@@ -264,7 +269,7 @@ def main():
                         # Download button for filtered results
                         csv_filtered = filtered_df.to_csv(index=False)
                         st.download_button(
-                            label="Download Filtered Results",
+                            label="💾 Download Filtered Results",
                             data=csv_filtered,
                             file_name=f"doi_dates_filtered_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                             mime="text/csv"
@@ -279,7 +284,7 @@ def main():
                 # Download button for full results
                 csv_full = df.to_csv(index=False)
                 st.download_button(
-                    label="Download Full Results",
+                    label="💾 Download Full Results",
                     data=csv_full,
                     file_name=f"doi_dates_full_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv"
