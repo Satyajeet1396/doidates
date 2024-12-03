@@ -166,6 +166,33 @@ class DOIProcessor:
 
 def main():
     st.title("DOI Date Retriever")
+    
+    # App information
+    st.markdown("""
+    ### 📚 About This App
+    This app helps researchers retrieve creation dates for academic papers using their DOIs (Digital Object Identifiers).
+    
+    #### Features:
+    * 📂 Upload multiple CSV files containing DOI columns
+    * 🔄 Process DOIs in parallel for faster results
+    * 📅 Filter results by date range
+    * 📊 View both full and filtered results
+    * 💾 Download results in CSV format
+    
+    #### How to Use:
+    1. Upload one or more CSV files containing DOI columns
+    2. (Optional) Set a date range to filter results
+    3. Click 'Process DOIs' to start retrieval
+    4. View results and download as needed
+    
+    #### Note:
+    * The app uses the Crossref API to retrieve publication dates
+    * Processing time depends on the number of DOIs
+    * Results show creation dates in YYYY-MM format
+    """)
+    
+    st.divider()  # Add a visual separator
+    
     st.write("Upload CSV files containing DOIs to retrieve their creation dates")
     
     # Initialize session state
