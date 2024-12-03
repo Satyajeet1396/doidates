@@ -309,6 +309,12 @@ st.info("For more cool apps like this visit: https://patilsatyajeet.wixsite.com/
 # Support section
 st.title("Support our Research")
 
+def main():
+    # Title and About section with custom styling
+    st.markdown("""
+    <h1 style='text-align: center;'>DOI Date Retriever</h1>
+    """, unsafe_allow_html=True)
+    
     with st.expander("ℹ️ Support our Research", expanded=False):
         st.markdown("""
 st.write("Scan the QR code below to make a payment to: satyajeet1396@oksbi")
