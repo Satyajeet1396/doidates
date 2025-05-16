@@ -55,8 +55,10 @@ class DOIProcessor:
                 data = response.json()
                 if 'message' in data and 'created' in data['message']:
                     date_parts = data['message']['created']['date-parts'][0]
-                    if len(date_parts) >= 2:
-                        return str(doi), f"{date_parts[0]}-{date_parts[1]:02d}"
+                    if len(date_parts) >= 3:
+    return str(doi), f"{date_parts[2]:02d}-{date_parts[1]:02d}-{date_parts[0]}"
+elif len(date_parts) == 2:
+    return str(doi), f"01-{date_parts[1]:02d}-{date_parts[0]}"
                     return str(doi), str(date_parts[0])
             time.sleep(0.1)
             return str(doi), "Not available"
@@ -71,8 +73,8 @@ class DOIProcessor:
             
         try:
             # Convert Created Date to datetime
-            df['Created Date'] = pd.to_datetime(df['Created Date'], format='%Y-%m', errors='coerce')
-            
+           df['Created Date'] = pd.to_datetime(df['Created Date'], errors='coerce')
+
             # Apply date filters
             if start_date:
                 start_date = pd.to_datetime(start_date)
@@ -83,7 +85,8 @@ class DOIProcessor:
                 df = df[df['Created Date'] <= end_date]
             
             # Convert back to original format
-            df['Created Date'] = df['Created Date'].dt.strftime('%Y-%m')
+            df['Created Date'] = df['Created Date'].dt.strftime('%d-%m-%Y')
+
             
             return df
             
