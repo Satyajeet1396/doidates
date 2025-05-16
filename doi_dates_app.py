@@ -56,9 +56,9 @@ class DOIProcessor:
                 if 'message' in data and 'created' in data['message']:
                     date_parts = data['message']['created']['date-parts'][0]
                     if len(date_parts) >= 3:
-    return str(doi), f"{date_parts[2]:02d}-{date_parts[1]:02d}-{date_parts[0]}"
-elif len(date_parts) == 2:
-    return str(doi), f"01-{date_parts[1]:02d}-{date_parts[0]}"
+                        return str(doi), f"{date_parts[2]:02d}-{date_parts[1]:02d}-{date_parts[0]}"
+                    elif len(date_parts) == 2:
+                        return str(doi), f"01-{date_parts[1]:02d}-{date_parts[0]}"
                     return str(doi), str(date_parts[0])
             time.sleep(0.1)
             return str(doi), "Not available"
@@ -73,7 +73,7 @@ elif len(date_parts) == 2:
             
         try:
             # Convert Created Date to datetime
-           df['Created Date'] = pd.to_datetime(df['Created Date'], errors='coerce')
+            df['Created Date'] = pd.to_datetime(df['Created Date'], errors='coerce')
 
             # Apply date filters
             if start_date:
@@ -84,9 +84,8 @@ elif len(date_parts) == 2:
                 end_date = pd.to_datetime(end_date)
                 df = df[df['Created Date'] <= end_date]
             
-            # Convert back to original format
+            # Convert back to original DD-MM-YYYY format
             df['Created Date'] = df['Created Date'].dt.strftime('%d-%m-%Y')
-
             
             return df
             
@@ -150,13 +149,13 @@ elif len(date_parts) == 2:
                 df = df[cols]
             
             # Convert to datetime for sorting
-            df['Created Date'] = pd.to_datetime(df['Created Date'], format='%Y-%m', errors='coerce')
+            df['Created Date'] = pd.to_datetime(df['Created Date'], format='%d-%m-%Y', errors='coerce')
             
             # Sort by Created Date
             df = df.sort_values('Created Date', ascending=True)
             
-            # Convert back to string format
-            df['Created Date'] = df['Created Date'].dt.strftime('%Y-%m')
+            # Convert back to DD-MM-YYYY string format
+            df['Created Date'] = df['Created Date'].dt.strftime('%d-%m-%Y')
             
             # Set progress to complete
             progress_bar.progress(1.0)
@@ -181,7 +180,7 @@ def main():
         ### ✨ Features:
         * 📂 Upload multiple CSV files containing DOI columns
         * 🔄 Process DOIs in parallel for faster results
-        * 📅 Filter results by date range
+        * 📅 Filter results by date range (DD-MM-YYYY format)
         * 📊 View both full and filtered results
         * 💾 Download results in CSV format
         
@@ -194,10 +193,10 @@ def main():
         ### ⚠️ Important Notes:
         * The app uses the Crossref API to retrieve publication dates
         * Processing time depends on the number of DOIs
-        * Results show creation dates in YYYY-MM format
+        * Results show creation dates in DD-MM-YYYY format
         """)
     
-    st.divider()  # Add a visual separator
+    st.divider()
     
     # Initialize session state
     if 'processed_data' not in st.session_state:
@@ -212,7 +211,7 @@ def main():
     st.write("Upload one or more CSV files containing DOI columns")
     uploaded_files = st.file_uploader("Choose CSV files", type="csv", accept_multiple_files=True)
     
-    # Clear results button - moved after file uploader
+    # Clear results button
     col1, col2 = st.columns([1, 4])
     with col1:
         if st.session_state.processed_data is not None:
@@ -222,7 +221,7 @@ def main():
                         del st.session_state[key]
                 st.rerun()
     
-    # Date range inputs with better organization
+    # Date range inputs
     st.markdown("### 📅 Date Range Filter (Optional)")
     date_col1, date_col2 = st.columns(2)
     with date_col1:
@@ -234,7 +233,7 @@ def main():
         st.markdown("### 🔄 Process DOIs")
         process_button = st.button("🚀 Process DOIs", type="primary", use_container_width=True)
         if process_button or st.session_state.processed_data is not None:
-            if st.session_state.processed_data is None or process_button:  # Process if no data or button clicked
+            if st.session_state.processed_data is None or process_button:
                 processor = DOIProcessor()
                 
                 # Combine files
